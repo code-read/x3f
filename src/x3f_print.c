@@ -9,6 +9,7 @@
 
 #include "x3f_print.h"
 #include "x3f_io.h"
+#include "x3f_config.h"
 
 #include <stdio.h>
 
@@ -123,42 +124,40 @@ static void print_matrix(FILE *f_out, camf_entry_t *entry)
 
 static void print_file_header_meta_data(FILE *f_out, x3f_t *x3f)
 {
-  x3f_header_t *H = NULL;
+    x3f_header_t *H = NULL;
+    fprintf(f_out, "BEGIN: file header meta data from x3f_print version %d.%d\n\n",
+           x3f_extract_VERSION_MAJOR, x3f_extract_VERSION_MINOR);
 
-  fprintf(f_out, "BEGIN: file header meta data\n\n");
+    H = &x3f->header;
+    fprintf(f_out, "header.\n");
+    fprintf(f_out, "  identifier        = %08x (%s)\n", H->identifier, x3f_id(H->identifier));
+    fprintf(f_out, "  version           = %08x\n", H->version);
+    /* TODO: the meaning of the rest of the header for version >= 4.0
+             (Quattro) is unknown */
+    if (H->version < X3F_VERSION_4_0) {
+        fprintf(f_out, "  unique_identifier = %02x...\n", H->unique_identifier[0]);
+        fprintf(f_out, "  mark_bits         = %08x\n", H->mark_bits);
+        fprintf(f_out, "  columns           = %08x (%d)\n", H->columns, H->columns);
+        fprintf(f_out, "  rows              = %08x (%d)\n", H->rows, H->rows);
+        fprintf(f_out, "  rotation          = %08x (%d)\n", H->rotation, H->rotation);
+        if (x3f->header.version >= X3F_VERSION_2_1) {
+            int num_ext_data = H->version >= X3F_VERSION_3_0 ? NUM_EXT_DATA_3_0 : NUM_EXT_DATA_2_1;
+            int i;
 
-  H = &x3f->header;
-  fprintf(f_out, "header.\n");
-  fprintf(f_out, "  identifier        = %08x (%s)\n", H->identifier, x3f_id(H->identifier));
-  fprintf(f_out, "  version           = %08x\n", H->version);
-  /* TODO: the meaning of the rest of the header for version >= 4.0
-           (Quattro) is unknown */
-  if (H->version < X3F_VERSION_4_0) {
-    fprintf(f_out, "  unique_identifier = %02x...\n", H->unique_identifier[0]);
-    fprintf(f_out, "  mark_bits         = %08x\n", H->mark_bits);
-    fprintf(f_out, "  columns           = %08x (%d)\n", H->columns, H->columns);
-    fprintf(f_out, "  rows              = %08x (%d)\n", H->rows, H->rows);
-    fprintf(f_out, "  rotation          = %08x (%d)\n", H->rotation, H->rotation);
-    if (x3f->header.version >= X3F_VERSION_2_1) {
-      int num_ext_data =
-	H->version >= X3F_VERSION_3_0 ? NUM_EXT_DATA_3_0 : NUM_EXT_DATA_2_1;
-      int i;
+            fprintf(f_out, "  white_balance     = %s\n", H->white_balance);
+            if (x3f->header.version >= X3F_VERSION_2_3)
+                fprintf(f_out, "  color_mode        = %s\n", H->color_mode);
 
-      fprintf(f_out, "  white_balance     = %s\n", H->white_balance);
-      if (x3f->header.version >= X3F_VERSION_2_3)
-	fprintf(f_out, "  color_mode        = %s\n", H->color_mode);
-
-      fprintf(f_out, "  extended_types\n");
-      for (i=0; i<num_ext_data; i++) {
-	uint8_t type = H->extended_types[i];
-	float data = H->extended_data[i];
-
-	fprintf(f_out, "    %2d: %3d = %9f\n", i, type, data);
-      }
+            fprintf(f_out, "  extended_types\n");
+            for (i=0; i<num_ext_data; i++) {
+                uint8_t type = H->extended_types[i];
+                float   data = H->extended_data[i];
+                fprintf(f_out, "    %2d: %3d = %9f\n", i, type, data);
+            }
+        }
     }
-  }
 
-  fprintf(f_out, "END: file header meta data\n\n");
+    fprintf(f_out, "END: file header meta data\n\n");
 }
 
 static void print_camf_meta_data2(FILE *f_out, x3f_camf_t *CAMF)
@@ -171,16 +170,11 @@ static void print_camf_meta_data2(FILE *f_out, x3f_camf_t *CAMF)
 
     for (i=0; i<CAMF->entry_table.size; i++) {
       if (f_out == stdout) {
-	fprintf(f_out, "          element[%d].name = \"%s\"\n",
-		i, entry[i].name_address);
-	fprintf(f_out, "            id = %x (%s)\n",
-		entry[i].id, id_to_str(entry[i].id));
-	fprintf(f_out, "            entry_size = %d\n",
-		entry[i].entry_size);
-	fprintf(f_out, "            name_size = %d\n",
-		entry[i].name_size);
-	fprintf(f_out, "            value_size = %d\n",
-		entry[i].value_size);
+	fprintf(f_out, "          element[%d].name = \"%s\"\n", i, entry[i].name_address);
+	fprintf(f_out, "            id = %x (%s)\n", entry[i].id, id_to_str(entry[i].id));
+	fprintf(f_out, "            entry_size = %d\n", entry[i].entry_size);
+	fprintf(f_out, "            name_size = %d\n", entry[i].name_size);
+	fprintf(f_out, "            value_size = %d\n", entry[i].value_size);
       }
 
       /* Text CAMF */
@@ -360,75 +354,64 @@ static void print_prop_meta_data(FILE *f_out, x3f_t *x3f)
       printf("        type        = %08x\n", ID->type);
       printf("        format      = %08x\n", ID->format);
       printf("        type_format = %08x\n", ID->type_format);
-      printf("        columns     = %08x (%d)\n",
-             ID->columns, ID->columns);
-      printf("        rows        = %08x (%d)\n",
-             ID->rows, ID->rows);
-      printf("        row_stride  = %08x (%d)\n",
-             ID->row_stride, ID->row_stride);
+      printf("        columns     = %08x (%d)\n", ID->columns, ID->columns);
+      printf("        rows        = %08x (%d)\n", ID->rows, ID->rows);
+      printf("        row_stride  = %08x (%d)\n", ID->row_stride, ID->row_stride);
 
       if (HUF == NULL) {
         printf("        huffman     = %p\n", HUF);
       } else {
         printf("        huffman->\n");
-        printf("          mapping     = %x %p\n",
-               HUF->mapping.size, HUF->mapping.element);
-        printf("          table       = %x %p\n",
-               HUF->table.size, HUF->table.element);
-        printf("          tree        = %d %p\n",
-	       HUF->tree.free_node_index, HUF->tree.nodes);
-        printf("          row_offsets = %x %p\n",
-               HUF->row_offsets.size, HUF->row_offsets.element);
-        printf("          rgb8        = %x %x %p\n",
-               HUF->rgb8.columns, HUF->rgb8.rows, HUF->rgb8.data);
+        printf("          mapping     = %x %p\n", HUF->mapping.size, HUF->mapping.element);
+        printf("          table       = %x %p\n", HUF->table.size, HUF->table.element);
+        printf("          tree        = %d %p\n", HUF->tree.free_node_index, HUF->tree.nodes);
+        printf("          row_offsets = %x %p\n", HUF->row_offsets.size, HUF->row_offsets.element);
+        printf("          rgb8        = %x %x %p\n", HUF->rgb8.columns, HUF->rgb8.rows, HUF->rgb8.data);
         printf("          x3rgb16     = %x %x %p\n",
                HUF->x3rgb16.columns, HUF->x3rgb16.rows, HUF->x3rgb16.data);
       }
 
-      if (TRU == NULL) {
-        printf("        tru         = %p\n", TRU);
-      } else {
-	int i;
+        if (TRU == NULL) {
+            printf("        tru         = %p\n", TRU);
+        } else {
+            int i;
 
-        printf("        tru->\n");
-        printf("          seed[0]     = %x\n", TRU->seed[0]);
-        printf("          seed[1]     = %x\n", TRU->seed[1]);
-        printf("          seed[2]     = %x\n", TRU->seed[2]);
-        printf("          unknown     = %x\n", TRU->unknown);
-        printf("          table       = %x %p\n",
-               TRU->table.size, TRU->table.element);
-        printf("          plane_size  = %x %p (",
-               TRU->plane_size.size, TRU->plane_size.element);
-	for (i=0; i<TRU->plane_size.size; i++)
-	  printf(" %d", TRU->plane_size.element[i]);
-	printf(" )\n");
-	printf("          plane_address (");
-	for (i=0; i<TRUE_PLANES; i++)
-	  printf(" %p", TRU->plane_address[i]);
-	printf(" )\n");
-	printf("          tree        = %d %p\n",
-	       TRU->tree.free_node_index, TRU->tree.nodes);
-        printf("          x3rgb16     = %x %x %p\n",
-               TRU->x3rgb16.columns, TRU->x3rgb16.rows, TRU->x3rgb16.data);
-      }
+            printf("        tru->\n");
+            printf("          seed[0]     = %x\n", TRU->seed[0]);
+            printf("          seed[1]     = %x\n", TRU->seed[1]);
+            printf("          seed[2]     = %x\n", TRU->seed[2]);
+            printf("          unknown     = %x\n", TRU->unknown);
+            printf("          table       = %x %p\n", TRU->table.size, TRU->table.element);
+            printf("          plane_size  = %x %p (", TRU->plane_size.size, TRU->plane_size.element);
+            for (i=0; i<TRU->plane_size.size; i++)
+                printf(" %d", TRU->plane_size.element[i]);
+            printf(" )\n");
+            printf("          plane_address (");
+            for (i=0; i<TRUE_PLANES; i++)
+                printf(" %p", TRU->plane_address[i]);
+            printf(" )\n");
+            printf("          tree        = %d %p\n",
+                   TRU->tree.free_node_index, TRU->tree.nodes);
+            printf("          x3rgb16     = %x %x %p\n",
+                   TRU->x3rgb16.columns, TRU->x3rgb16.rows, TRU->x3rgb16.data);
+        }
 
-      if (Q == NULL) {
-	printf("        quattro     = %p\n", Q);
-      } else {
-	int i;
+        if (Q == NULL) {
+            printf("        quattro     = %p\n", Q);
+        } else {
+            int i;
 
-	printf("        quattro->\n");
-	printf("          planes (");
-	for (i=0; i<TRUE_PLANES; i++) {
-	  printf(" %d", Q->plane[i].columns);
-	  printf("x%d", Q->plane[i].rows);
-	}
-	printf(" )\n");
-        printf("          unknown     = %x %d\n",
-               Q->unknown, Q->unknown);
-      }
+            printf("        quattro->\n");
+            printf("          planes (");
+            for (i=0; i<TRUE_PLANES; i++) {
+                printf(" %d", Q->plane[i].columns);
+                printf("x%d", Q->plane[i].rows);
+            }
+            printf(" )\n");
+            printf("          unknown     = %x %d\n", Q->unknown, Q->unknown);
+        }
 
-      printf("        data        = %p\n", ID->data);
+        printf("        data        = %p\n", ID->data);
     }
 
     if (DEH->identifier == X3F_SECc) {

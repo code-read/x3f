@@ -1,0 +1,12 @@
+//
+// Created by Carson on 09/19/16.
+//
+
+#ifndef X3F_X3FCONFIG_H_IN_H
+#define X3F_X3FCONFIG_H_IN_H
+
+//  Configured options and settings for preprocessing by CMake:
+#define x3f_extract_VERSION_MAJOR @x3f_extract_VERSION_MAJOR@
+#define x3f_extract_VERSION_MINOR @x3f_extract_VERSION_MINOR@
+
+#endif //X3F_X3FCONFIG_H_IN_H

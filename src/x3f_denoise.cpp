@@ -28,8 +28,7 @@ static void denoise_nlm(Mat& img, float h)
   float h1[3] = {0.0, h, h}, h2[3] = {0.0, h/8, h/4};
 
   x3f_printf(DEBUG, "BEGIN denoising\n");
-  fastNlMeansDenoising(img, out, std::vector<float>(h1, h1+3),
-		       3, 11, NORM_L1);
+  fastNlMeansDenoising(img, out, std::vector<float>(h1, h1+3), 3, 11, NORM_L1);
   x3f_printf(DEBUG, "END denoising\n");
 
   x3f_printf(DEBUG, "BEGIN V median filtering\n");

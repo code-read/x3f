@@ -365,7 +365,7 @@ typedef struct x3f_camf_s {
 } x3f_camf_t;
 
 typedef struct x3f_directory_entry_header_s {
-  uint32_t identifier;        /* Should be ´SECp´, "SECi", ... */
+  uint32_t identifier;        /* Should be "SECp", "SECi", ... */
   uint32_t version;           /* 0x00020001 is version 2.1  */
   union {
     x3f_property_list_t property_list;
@@ -386,7 +386,7 @@ typedef struct x3f_directory_entry_s {
 } x3f_directory_entry_t;
 
 typedef struct x3f_directory_section_s {
-  uint32_t identifier;          /* Should be ´SECd´ */
+  uint32_t identifier;          /* Should be "SECd" */
   uint32_t version;             /* 0x00020001 is version 2.1  */
 
   /* 2.0 Fields */
@@ -396,7 +396,7 @@ typedef struct x3f_directory_section_s {
 
 typedef struct x3f_header_s {
   /* 2.0 Fields */
-  uint32_t identifier;          /* Should be ´FOVb´ */
+  uint32_t identifier;          /* Should be "FOVb" */
   uint32_t version;             /* 0x00020001 means 2.1 */
   uint8_t unique_identifier[SIZE_UNIQUE_IDENTIFIER];
   uint32_t mark_bits;
