@@ -336,7 +336,7 @@ static int x3f_is_TRUE_engine(x3f_t *x3f)
   char **names, **values;
   uint32_t num;
 
-  /* TODO: is there a better way to test this */
+  /* TODO: is there a better way to test this? */
   if ((x3f_get_camf_property_list(x3f, "WhiteBalanceColorCorrections",
 				  &names, &values, &num) ||
        x3f_get_camf_property_list(x3f, "DP1_WhiteBalanceColorCorrections",
@@ -370,7 +370,7 @@ static int x3f_is_TRUE_engine(x3f_t *x3f)
     return 1;
   }
 
-  /* It seems that RawSaturationLevel should be used for TURE engine and
+  /* It seems that RawSaturationLevel should be used for TRUE engine and
      SaturationLevel for pre-TRUE engine */
   if (x3f_is_TRUE_engine(x3f))
     return x3f_get_camf_signed_vector(x3f, "RawSaturationLevel",
