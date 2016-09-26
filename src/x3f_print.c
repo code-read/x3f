@@ -10,8 +10,11 @@
 #include "x3f_print.h"
 #include "x3f_io.h"
 #include "x3f_config.h"
+#include "x3f_output_tiff.h"
+#include "x3f_printf.h"
 
 #include <stdio.h>
+#include <mem.h>
 
 /* --------------------------------------------------------------------- */
 /* Hacky external flags                                                 */
@@ -63,7 +66,7 @@ static void print_matrix_element(FILE *f_out, camf_entry_t *entry, uint32_t i) {
 }
 
 static void print_matrix(FILE *f_out, camf_entry_t *entry) {
-    uint32_t dim = entry->matrix_dim;
+    uint32_t dim       = entry->matrix_dim;
     uint32_t linesize  = entry->matrix_dim_entry[dim - 1].size;
     uint32_t blocksize = (uint32_t) (-1);
     uint32_t totalsize = entry->matrix_elements;
@@ -121,7 +124,7 @@ static void print_matrix(FILE *f_out, camf_entry_t *entry) {
 
 static void print_file_header_meta_data(FILE *f_out, x3f_t *x3f) {
     x3f_header_t *H = NULL;
-    fprintf(f_out, "BEGIN: file header meta data from x3f_print version %d.%d\n\n",
+    fprintf(f_out, "BEGIN: file header meta data from x3f_extract version %d.%d\n\n",
             x3f_extract_VERSION_MAJOR, x3f_extract_VERSION_MINOR);
 
     H = &x3f->header;
@@ -152,7 +155,6 @@ static void print_file_header_meta_data(FILE *f_out, x3f_t *x3f) {
             }
         }
     }
-
     fprintf(f_out, "END: file header meta data\n\n");
 }
 
@@ -205,7 +207,7 @@ static void print_camf_meta_data2(FILE *f_out, x3f_camf_t *CAMF) {
 
                 if (f_out == stdout) {
                     fprintf(f_out, "            matrix_type = %d\n", entry[i].matrix_type);
-                    fprintf(f_out, "            matrix_dim = %d\n", entry[i].matrix_dim);
+                    fprintf(f_out, "            matrix_dim = %d\n",  entry[i].matrix_dim);
                     fprintf(f_out, "            matrix_data_off = %d\n", entry[i].matrix_data_off);
 
                     for (j = 0; j < entry[i].matrix_dim; j++) {
@@ -224,6 +226,22 @@ static void print_camf_meta_data2(FILE *f_out, x3f_camf_t *CAMF) {
                 }
 
                 print_matrix(f_out, &entry[i]);
+
+                // crw: dump spatial gain table to .tif file:
+                char sgain_filename[40]; // buffer for name
+                sprintf(sgain_filename, "%s%s", entry[i].name_address, ".tif");
+
+                x3f_printf(DEBUG, "Attempt save sgain: %s %d %d\n",
+                           entry[i].name_address,
+                           entry[i].matrix_decoded_type,
+                           entry[i].matrix_dim);
+
+                if (!strncmp(entry[i].name_address, "SpatialGainR_", 13) ||
+                    !strncmp(entry[i].name_address, "SpatialGainG_", 13) ||
+                    !strncmp(entry[i].name_address, "SpatialGainB_", 13)) {
+                    x3f_printf(INFO, "Save spatial gain image %s\n", sgain_filename);
+                    dump_sgain_table_as_tiff(&entry[i], sgain_filename); //crw
+                }
 
                 fprintf(f_out, "END: CAMF matrix meta data\n\n");
             }

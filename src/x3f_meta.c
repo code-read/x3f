@@ -289,7 +289,7 @@
   return 0;
 }
 
-/* extern */ char *x3f_get_wb(x3f_t *x3f)
+/* extern */ char *x3f_get_wht_bal(x3f_t *x3f)
 {
   uint32_t wb;
 

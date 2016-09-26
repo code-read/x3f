@@ -46,13 +46,13 @@ size_t strnlen(const char *start, size_t maxlen) {
 }
 
 typedef enum {
-    META = 0,
-    JPEG = 1,
-    RAW = 2,
-    TIFF = 3,
-    DNG = 4,
-    PPMP3 = 5,
-    PPMP6 = 6,
+    META      = 0,
+    JPEG      = 1,
+    RAW       = 2,
+    TIFF      = 3,
+    DNG       = 4,
+    PPMP3     = 5,
+    PPMP6     = 6,
     HISTOGRAM = 7
 }
         output_file_type_t;
@@ -68,7 +68,7 @@ static char *extension[] =
          ".csv"};
 
 static void usage(char *progname) {
-    fprintf(stderr, "\nx3f_print, version %d.%d\n",
+    fprintf(stderr, "\nx3f_extract, version %d.%d\n",
             x3f_extract_VERSION_MAJOR, x3f_extract_VERSION_MINOR);
 
     fprintf(stderr,
@@ -132,6 +132,7 @@ static int check_dir(char *Path) {
     return 0;
 }
 
+// where do these values come from? - crw
 #define MAXPATH 1000
 #define EXTMAX 10
 #define MAXOUTPATH (MAXPATH+EXTMAX)
@@ -239,6 +240,8 @@ int main(int argc, char *argv[]) {
         else if (!strcmp(argv[i], "-loghist"))
             Z, extract_raw = 1, file_type = HISTOGRAM, log_hist = 1;
 
+        // todo: tolerate lower/upper case, e.g., -srgb -SRGB, etc. but requires tolower() on each
+        // character & probably a secondary buffer so we don't tamper w/argv - crw
         else if (!strcmp(argv[i], "-color") && (i + 1) < argc) {
             char *encoding = argv[++i];
             if (!strcmp(encoding, "none"))

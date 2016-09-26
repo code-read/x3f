@@ -18,7 +18,6 @@ configure_file  (
 # Include directory where CMake will deposit x3f_config.h:
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-
 #include_directories(C:/Users/Carson/AppData/Local/opencv-2.4.13/build/include)
 #include_directories(C:/Users/Carson/AppData/Local/opencv-3.0.0/build/include)
 #include_directories(C:/Users/Carson/ClionProjects/opencv/include)
@@ -87,7 +86,12 @@ set(SOURCE_FILES
     src/x3f_spatial_gain.c
     src/x3f_spatial_gain.h)
 
-add_executable(x3f ${SOURCE_FILES})
+add_executable(x3f_extract ${SOURCE_FILES})
+
+add_executable(x3f_io_test ${SOURCE_FILES})
+
+add_executable(x3f_matrix_test src/x3f_matrix_test.c src/x3f_matrix.c
+        src/x3f_matrix.h src/x3f_printf.h src/x3f_printf.c)
 
 # May be optional if we link with 32 bit only:
 #set_target_properties(x3f PROPERTIES COMPILE_FLAGS "-m32" LINK_FLAGS "-m32")
@@ -99,5 +103,7 @@ add_executable(x3f ${SOURCE_FILES})
 #find_package( OpenCV REQUIRED ) # only looked for core and imgproc; trouble building highgui; workaround for now - crw
 find_package( OpenCV COMPONENTS core imgproc photo )
 
-TARGET_LINK_LIBRARIES(x3f ${OpenCV_LIBS})
+TARGET_LINK_LIBRARIES(x3f_extract ${OpenCV_LIBS})
+TARGET_LINK_LIBRARIES(x3f_io_test ${OpenCV_LIBS})
+
 #TARGET_LINK_LIBRARIES(x3f INTERFACE ${OpenCV_LIBS})

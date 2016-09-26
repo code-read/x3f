@@ -30,7 +30,7 @@ extern int x3f_get_camf_property_list(x3f_t *x3f, char *list,
 extern int x3f_get_camf_property(x3f_t *x3f, char *list,
 				 char *name, char **value);
 extern int x3f_get_prop_entry(x3f_t *x3f, char *name, char **value);
-extern char *x3f_get_wb(x3f_t *x3f);
+extern char *x3f_get_wht_bal(x3f_t *x3f);
 extern int x3f_get_camf_matrix_for_wb(x3f_t *x3f,
 				      char *list, char *wb, int dim0, int dim1,
 				      double *matrix);

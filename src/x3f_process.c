@@ -754,7 +754,7 @@ static int expand_quattro(x3f_t *x3f, int denoise, x3f_area16_t *expanded) {
     x3f_area16_t original_image, expanded;
     x3f_image_levels_t il;
 
-    if (wb == NULL) wb = x3f_get_wb(x3f);
+    if (wb == NULL) wb = x3f_get_wht_bal(x3f);
 
     if (encoding == QTOP) {
         x3f_area16_t qtop;
