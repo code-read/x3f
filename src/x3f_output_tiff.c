@@ -10,6 +10,7 @@
 #include "x3f_output_tiff.h"
 #include "x3f_process.h"
 #include "x3f_printf.h"
+#include "x3f_io.h"
 
 #include <stdlib.h>
 #include <tiffio.h>
@@ -63,37 +64,36 @@ x3f_return_t x3f_dump_raw_data_as_tiff(x3f_t *x3f,
 /* Write CAMF entry to TIFF file - crw */
 /* extern */
 x3f_return_t dump_sgain_table_as_tiff(camf_entry_t *entry, char *outfilename) {
-
-    x3f_printf(DEBUG, "dump_sgain_table_as_tiff start\n");
-
     x3f_area16_t image;
 
-    uint32_t dim       = entry->matrix_dim;
-    uint32_t linesize  = entry->matrix_dim_entry[dim - 1].size;
-    uint32_t blocksize = (uint32_t) (-1);
-    uint32_t totalsize = entry->matrix_elements;
-    int i;
+    uint32_t dim       = entry->matrix_dim; // How many dimensions this matrix has (always 2 for us)
+//    uint32_t blocksize = (uint32_t) (-1);
+//    uint32_t totalsize = entry->matrix_elements;
 
     // Sanity check: we only write a 2d table of unsigned int (i.e., spatial gain table):
     if ((entry->matrix_decoded_type != M_UINT) || (dim != 2)) {
         return X3F_ARGUMENT_ERROR;
     }
 
-    x3f_printf(DEBUG, "dump_sgain_table_as_tiff opening file %s\n", outfilename);
+    image.channels   = 1;
+    image.rows       = entry->matrix_dim_entry[0].size;
+    image.columns    = entry->matrix_dim_entry[1].size;
+//    image.row_stride = image.columns;
+    image.row_stride = image.columns * entry->matrix_element_size;
 
     TIFF *f_out = TIFFOpen(outfilename, "w");
-
-    int row;
-
     if (f_out == NULL) return X3F_OUTFILE_ERROR;
 
-    x3f_printf(INFO, "dump_sgain_table_as_tiff file open OK\n");
+    x3f_printf(DEBUG, "dump_sgain_table_as_tiff matrix_element_size = %d\n",
+               entry->matrix_element_size);
 
     TIFFSetField(f_out, TIFFTAG_IMAGEWIDTH, image.columns);
     TIFFSetField(f_out, TIFFTAG_IMAGELENGTH, image.rows);
     TIFFSetField(f_out, TIFFTAG_ROWSPERSTRIP, 32);
     TIFFSetField(f_out, TIFFTAG_SAMPLESPERPIXEL, image.channels);
-    TIFFSetField(f_out, TIFFTAG_BITSPERSAMPLE, 16);
+    // _MOD_ and _INF_ tables are 8 bit, others are 16 bit:
+//    TIFFSetField(f_out, TIFFTAG_BITSPERSAMPLE, 16);
+    TIFFSetField(f_out, TIFFTAG_BITSPERSAMPLE, entry->matrix_element_size * 8);
     TIFFSetField(f_out, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
     TIFFSetField(f_out, TIFFTAG_COMPRESSION, COMPRESSION_NONE);
     TIFFSetField(f_out, TIFFTAG_PHOTOMETRIC, image.channels == 1 ?
@@ -113,6 +113,19 @@ x3f_return_t dump_sgain_table_as_tiff(camf_entry_t *entry, char *outfilename) {
     for (row = 0; row < image.rows; row++)
         TIFFWriteScanline(f_out, image.data + image.row_stride * row, row, 0);
 */
+
+    x3f_printf(DEBUG, "  dumping sgain: %d rows, %d stride.\n", image.rows, image.row_stride);
+
+    int row;
+    for (row = 0; row < image.rows; row++) {
+        // int TIFFWriteScanline(TIFF* tif, tdata_t buf, uint32 row, tsample_t sample)
+        if(TIFFWriteScanline(f_out, entry->matrix_data + (image.row_stride * row), row, 0) < 0) {
+            x3f_printf(ERR, "error writing SGAIN file %s: %d\n", outfilename, errno);
+            TIFFClose(f_out);
+            break;
+        }
+    }
+
     TIFFWriteDirectory(f_out);
     TIFFClose(f_out);
     free(image.buf);

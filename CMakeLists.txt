@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.6)
 project(x3f)
 
-set(CMAKE_EXE_LINKER_FLAGS "-static")
+#set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS} "-static")
 set(CMAKE_VERBOSE_MAKEFILE TRUE)
 
 #  The version number.
