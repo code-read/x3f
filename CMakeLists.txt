@@ -18,19 +18,8 @@ configure_file  (
 # Include directory where CMake will deposit x3f_config.h:
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-#include_directories(C:/Users/Carson/AppData/Local/opencv-2.4.13/build/include)
-#include_directories(C:/Users/Carson/AppData/Local/opencv-3.0.0/build/include)
-#include_directories(C:/Users/Carson/ClionProjects/opencv/include)
-
-#include_directories(C:/Users/Carson/AppData/Local/tiff-3.8.2-1-lib/include)
-
-# Note: copied files manually from here to following include_directory as kludge b/c haven't figured out
-# ..how CMake build script accomplishes that and/or if it's a problem with CLion - crw:
-#include_directories(C:/Users/Carson/ClionProjects/tiff-4.0.6/libtiff)
 include_directories(C:/Users/Carson/.CLion2016.3/system/cmake/generated/tiff-4_0_6-830719ae/830719ae/Release/libtiff)
 
-#link_directories(C:/Users/Carson/AppData/Local/tiff-3.8.2-1-lib/lib)
-#link_libraries(C:/Users/Carson/AppData/Local/tiff-3.8.2-1-lib/lib/libtiff.lib)
 link_libraries(C:/Users/Carson/.CLion2016.3/system/cmake/generated/tiff-4_0_6-830719ae/830719ae/Release/libtiff/libtiff.a)
 
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
@@ -84,17 +73,7 @@ add_executable(x3f_io_test ${SOURCE_FILES})
 add_executable(x3f_matrix_test src/x3f_matrix_test.c src/x3f_matrix.c
         src/x3f_matrix.h src/x3f_printf.h src/x3f_printf.c)
 
-# May be optional if we link with 32 bit only:
-#set_target_properties(x3f PROPERTIES COMPILE_FLAGS "-m32" LINK_FLAGS "-m32")
-#set_target_properties(x3f PROPERTIES COMPILE_FLAGS "-Wl,Bstatic" LINK_FLAGS "-m32")
-#set_target_properties(x3f PROPERTIES LINK_FLAGS "-static -static-libgcc -static-libstdc++")
-
-#FIND_PACKAGE( OpenCV REQUIRED core highgui imgproc)
-#FIND_PACKAGE( OpenCV REQUIRED core imgproc) # trouble building highgui; workaround for now - crw
-#find_package( OpenCV REQUIRED ) # only looked for core and imgproc; trouble building highgui; workaround for now - crw
 find_package( OpenCV COMPONENTS core imgproc photo )
 
 TARGET_LINK_LIBRARIES(x3f_extract ${OpenCV_LIBS})
 TARGET_LINK_LIBRARIES(x3f_io_test ${OpenCV_LIBS})
-
-#TARGET_LINK_LIBRARIES(x3f INTERFACE ${OpenCV_LIBS})
