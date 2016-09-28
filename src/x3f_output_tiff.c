@@ -65,10 +65,7 @@ x3f_return_t x3f_dump_raw_data_as_tiff(x3f_t *x3f,
 /* extern */
 x3f_return_t dump_sgain_table_as_tiff(camf_entry_t *entry, char *outfilename) {
     x3f_area16_t image;
-
     uint32_t dim       = entry->matrix_dim; // How many dimensions this matrix has (always 2 for us)
-//    uint32_t blocksize = (uint32_t) (-1);
-//    uint32_t totalsize = entry->matrix_elements;
 
     // Sanity check: we only write a 2d table of unsigned int (i.e., spatial gain table):
     if ((entry->matrix_decoded_type != M_UINT) || (dim != 2)) {
@@ -78,7 +75,6 @@ x3f_return_t dump_sgain_table_as_tiff(camf_entry_t *entry, char *outfilename) {
     image.channels   = 1;
     image.rows       = entry->matrix_dim_entry[0].size;
     image.columns    = entry->matrix_dim_entry[1].size;
-//    image.row_stride = image.columns;
     image.row_stride = image.columns * entry->matrix_element_size;
 
     TIFF *f_out = TIFFOpen(outfilename, "w");
@@ -91,8 +87,7 @@ x3f_return_t dump_sgain_table_as_tiff(camf_entry_t *entry, char *outfilename) {
     TIFFSetField(f_out, TIFFTAG_IMAGELENGTH, image.rows);
     TIFFSetField(f_out, TIFFTAG_ROWSPERSTRIP, 32);
     TIFFSetField(f_out, TIFFTAG_SAMPLESPERPIXEL, image.channels);
-    // _MOD_ and _INF_ tables are 8 bit, others are 16 bit:
-//    TIFFSetField(f_out, TIFFTAG_BITSPERSAMPLE, 16);
+    // From my DP2M, _MOD_ and _INF_ tables are 8 bit, others are 16 bit - crw:
     TIFFSetField(f_out, TIFFTAG_BITSPERSAMPLE, entry->matrix_element_size * 8);
     TIFFSetField(f_out, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
     TIFFSetField(f_out, TIFFTAG_COMPRESSION, COMPRESSION_NONE);
@@ -102,19 +97,6 @@ x3f_return_t dump_sgain_table_as_tiff(camf_entry_t *entry, char *outfilename) {
     TIFFSetField(f_out, TIFFTAG_XRESOLUTION, 72.0);
     TIFFSetField(f_out, TIFFTAG_YRESOLUTION, 72.0);
     TIFFSetField(f_out, TIFFTAG_RESOLUTIONUNIT, RESUNIT_INCH);
-
-/* stub for now - crw
-    for (i = 0; i < totalsize; i++) {
-        print_matrix_element(f_out, entry, i);
-        if ((i + 1) % linesize  == 0) fprintf(f_out, "\n");
-        if ((i + 1) % blocksize == 0) fprintf(f_out, "\n");
-    }
-
-    for (row = 0; row < image.rows; row++)
-        TIFFWriteScanline(f_out, image.data + image.row_stride * row, row, 0);
-*/
-
-    x3f_printf(DEBUG, "  dumping sgain: %d rows, %d stride.\n", image.rows, image.row_stride);
 
     int row;
     for (row = 0; row < image.rows; row++) {

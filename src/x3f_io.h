@@ -40,6 +40,12 @@ extern "C" {
 #define X3F_VERSION_3_0 X3F_VERSION(3,0)
 #define X3F_VERSION_4_0 X3F_VERSION(4,0)
 
+// where do these values derive from? - crw
+#define MAXPATH 1000
+#define EXTMAX 10
+#define MAXOUTPATH (MAXPATH+EXTMAX)
+#define MAXTMPPATH (MAXOUTPATH+EXTMAX)
+
 /* Main file identifier */
 #define X3F_FOVb (uint32_t)(0x62564f46)
 /* Directory identifier */

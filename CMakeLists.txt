@@ -34,19 +34,10 @@ include_directories(C:/Users/Carson/.CLion2016.3/system/cmake/generated/tiff-4_0
 link_libraries(C:/Users/Carson/.CLion2016.3/system/cmake/generated/tiff-4_0_6-830719ae/830719ae/Release/libtiff/libtiff.a)
 
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -v -Wl,--verbose,--trace")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -v -Wl,--verbose,--cref")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -v -Wl,-Bstatic")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -v")
 
-#set(MSVC true)
-#set(MSVC_VERSION 1800)
 #set(OpenCV_DIR C:/Users/Carson/AppData/Local/opencv-3.0.0/build)
-
-#set(OpenCV_DIR C:/Users/Carson/.CLion2016.2/system/cmake/generated/opencv-97388285/97388285/Release)
 set(OpenCV_DIR C:/Users/Carson/.CLion2016.3/system/cmake/generated/opencv-97388285/97388285/Release)
-#set (OpenCV_STATIC TRUE)
-#SET(OpenCV_USE_STATIC_LIBS ON)
 
 set(SOURCE_FILES
     src/mingw_dowildcard.c

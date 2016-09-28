@@ -65,6 +65,8 @@ static void print_matrix_element(FILE *f_out, camf_entry_t *entry, uint32_t i) {
     }
 }
 
+static char outputfile_name[MAXOUTPATH];  // Save for spatial gain output file name generation
+
 static void print_matrix(FILE *f_out, camf_entry_t *entry) {
     uint32_t dim       = entry->matrix_dim;
     uint32_t linesize  = entry->matrix_dim_entry[dim - 1].size;
@@ -159,6 +161,8 @@ static void print_file_header_meta_data(FILE *f_out, x3f_t *x3f) {
 }
 
 static void print_camf_meta_data2(FILE *f_out, x3f_camf_t *CAMF) {
+    char sgain_filename[128]; // buffer for SGAIN TIF output filename
+
     fprintf(f_out, "BEGIN: CAMF meta data\n\n");
 
     if (CAMF->entry_table.size != 0) {
@@ -228,21 +232,23 @@ static void print_camf_meta_data2(FILE *f_out, x3f_camf_t *CAMF) {
                 print_matrix(f_out, &entry[i]);
 
                 // crw: dump spatial gain table to .tif file:
-                char sgain_filename[40]; // buffer for name
-                sprintf(sgain_filename, "%s%s", entry[i].name_address, ".tif");
-
+/*
                 x3f_printf(DEBUG, "Attempt save sgain: %s %d %d\n",
                            entry[i].name_address,
                            entry[i].matrix_decoded_type,
                            entry[i].matrix_dim);
+*/
 
-                if (!strncmp(entry[i].name_address, "SpatialGainR_", 13) ||
-                    !strncmp(entry[i].name_address, "SpatialGainG_", 13) ||
-                    !strncmp(entry[i].name_address, "SpatialGainB_", 13)) {
-                    x3f_printf(INFO, "Save spatial gain image %s\n", sgain_filename);
-                    dump_sgain_table_as_tiff(&entry[i], sgain_filename); //crw
+                if (sgain_tiff) {
+                    if (!strncmp(entry[i].name_address, "SpatialGainR_", 13) ||
+                        !strncmp(entry[i].name_address, "SpatialGainG_", 13) ||
+                        !strncmp(entry[i].name_address, "SpatialGainB_", 13)) {
+                        sprintf(sgain_filename, "%s_%s_%s%s", outputfile_name,
+                                "SG", entry[i].name_address + 11, ".tif");
+                        x3f_printf(INFO, "Save spatial gain image %s\n", sgain_filename);
+                        dump_sgain_table_as_tiff(&entry[i], sgain_filename); //crw
+                    }
                 }
-
                 fprintf(f_out, "END: CAMF matrix meta data\n\n");
             }
         }
@@ -478,6 +484,11 @@ static void print_prop_meta_data(FILE *f_out, x3f_t *x3f) {
 }
 
 /* extern */ x3f_return_t x3f_dump_meta_data(x3f_t *x3f, char *outfilename) {
+
+    strcpy(outputfile_name, outfilename);  // Save for SpatialGain file output names
+//    e.g., _P2M0197.X3F.meta.tmp
+    memset(strstr(outputfile_name, ".meta.tmp"), 0, 1);
+
     FILE *f_out = fopen(outfilename, "wb");
 
     if (f_out == NULL) {
