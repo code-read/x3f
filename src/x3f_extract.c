@@ -67,6 +67,8 @@ static char *extension[] =
          ".ppm",
          ".csv"};
 
+int sgain_tiff = 0;
+
 static void usage(char *progname) {
     fprintf(stderr, "\nx3f_extract, version %d.%d\n",
             x3f_extract_VERSION_MAJOR, x3f_extract_VERSION_MINOR);
@@ -104,11 +106,12 @@ static void usage(char *progname) {
                     "   -wb <WB>        Select white balance preset\n"
                     "   -compress       Enable ZIP compression for DNG and TIFF output\n"
                     "   -ocl            Use OpenCL\n"
+                    "   -sgaintiff      Save spatial gain tables as TIFF files (implies -meta)\n"
                     "\n"
                     "QUANTIFIERS\n"
                     "   -offset <OFF>   Offset for SD14 and older\n"
                     "                   NOTE: If not given, then offset is automatic\n"
-                    "   -matrixmax <M>  Max num matrix elements in metadata (def=100)\n", progname);
+                    "   -matrixmax <M>  Dump at most M metadata matrix elements (def=100)\n", progname);
     exit(1);
 }
 
@@ -132,11 +135,13 @@ static int check_dir(char *Path) {
     return 0;
 }
 
-// where do these values come from? - crw
+// where do these values derive from? - crw
+/* moved to x3f_io.h - crw
 #define MAXPATH 1000
 #define EXTMAX 10
 #define MAXOUTPATH (MAXPATH+EXTMAX)
 #define MAXTMPPATH (MAXOUTPATH+EXTMAX)
+*/
 
 static int safecpy(char *dst, const char *src, int dst_size) {
     if (strnlen(src, dst_size + 1) > dst_size) { // strnlen not part of standard C++ - crw
@@ -240,8 +245,8 @@ int main(int argc, char *argv[]) {
         else if (!strcmp(argv[i], "-loghist"))
             Z, extract_raw = 1, file_type = HISTOGRAM, log_hist = 1;
 
-        // todo: tolerate lower/upper case, e.g., -srgb -SRGB, etc. but requires tolower() on each
-        // character & probably a secondary buffer so we don't tamper w/argv - crw
+        // todo: tolerate lower/upper case, e.g., -srgb -SRGB, etc. strlwr()
+        // probably using a secondary buffer so we don't tamper w/argv - crw
         else if (!strcmp(argv[i], "-color") && (i + 1) < argc) {
             char *encoding = argv[++i];
             if (!strcmp(encoding, "none"))
@@ -280,8 +285,12 @@ int main(int argc, char *argv[]) {
             compress = 1;
         else if (!strcmp(argv[i], "-ocl"))
             use_opencl = 1;
+        else if (!strcmp(argv[i], "-sgaintiff")) {
+            sgain_tiff = 1;
+            Z, file_type = META;
+        }
 
-            /* Quantifiers */
+        /* Quantifiers */
         else if ((!strcmp(argv[i], "-offset")) && (i + 1) < argc)
             legacy_offset = atoi(argv[++i]), auto_legacy_offset = 0;
         else if ((!strcmp(argv[i], "-matrixmax")) && (i + 1) < argc)
