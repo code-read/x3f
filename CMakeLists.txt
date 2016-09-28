@@ -1,32 +1,29 @@
 cmake_minimum_required(VERSION 3.6)
 project(x3f)
 
-#set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS} "-static")
-set(CMAKE_VERBOSE_MAKEFILE TRUE)
+set(CMAKE_VERBOSE_MAKEFILE TRUE)  # Verbose output from 'make' during the build
 
-#  The version number.
+#  Global x3f project version number.
 set (x3f_extract_VERSION_MAJOR  0)
 set (x3f_extract_VERSION_MINOR  56)
 
-#  Configure a header file to pass some of the CMake settings
-#  to the source code
-configure_file  (
-"x3f_config.h.in"
-"x3f_config.h"
-)
+#  Header file to pass project version number and other CMake settings to the source code:
+configure_file  ( "x3f_config.h.in" "x3f_config.h" )
 
 # Include directory where CMake will deposit x3f_config.h:
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
+# Point this to your libtiff directory:
 include_directories(C:/Users/Carson/.CLion2016.3/system/cmake/generated/tiff-4_0_6-830719ae/830719ae/Release/libtiff)
 
+# Point this to your libtiff library:
 link_libraries(C:/Users/Carson/.CLion2016.3/system/cmake/generated/tiff-4_0_6-830719ae/830719ae/Release/libtiff/libtiff.a)
+
+# Point this to your OpenCV "build" sub directory (where OpenCVConfig.cmake lives):
+set(OpenCV_DIR C:/Users/Carson/.CLion2016.3/system/cmake/generated/opencv-97388285/97388285/Release)
 
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -v")
-
-#set(OpenCV_DIR C:/Users/Carson/AppData/Local/opencv-3.0.0/build)
-set(OpenCV_DIR C:/Users/Carson/.CLion2016.3/system/cmake/generated/opencv-97388285/97388285/Release)
 
 set(SOURCE_FILES
     src/mingw_dowildcard.c
