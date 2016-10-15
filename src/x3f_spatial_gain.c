@@ -80,8 +80,7 @@ static int get_merrill_type_gains_table(x3f_t *x3f, char *name, char *chan,
 
     sprintf(table, "GainsTable%s", chan);
     if (!x3f_get_camf_property(x3f, name, table, &val) ||
-        !x3f_get_camf_matrix_var(x3f, val, &rows_tmp, &cols_tmp, NULL,
-                                 M_UINT, (void **) mgain) ||
+        !x3f_get_camf_matrix_var(x3f, val, &rows_tmp, &cols_tmp, NULL, M_UINT, (void **) mgain) ||
         (*rows != -1 && *rows != rows_tmp) ||
         (*cols != -1 && *cols != cols_tmp))
         return 0;
@@ -90,12 +89,12 @@ static int get_merrill_type_gains_table(x3f_t *x3f, char *name, char *chan,
 
     sprintf(table, "MinGains%s", chan);
     if (!x3f_get_camf_property(x3f, name, table, &val)) return 0;
-    *mingain = atof(val);
 
+    *mingain = atof(val);
     sprintf(table, "Delta%s", chan);
     if (!x3f_get_camf_property(x3f, name, table, &val)) return 0;
-    *delta = atof(val);
 
+    *delta = atof(val);
     return 1;
 }
 
@@ -105,9 +104,8 @@ typedef struct merrill_spatial_gain_s {
     struct merrill_spatial_gain_s *next;
 } merrill_spatial_gain_t;
 
-
-int x3f_get_merrill_type_spatial_gain(x3f_t *x3f, int hp_flag,
-                                      x3f_spatial_gain_corr_t *corr) {
+// todo: why are hp_flag and "quattro" referenced in "merrill" type procedure? - crw
+int x3f_get_merrill_type_spatial_gain(x3f_t *x3f, int hp_flag, x3f_spatial_gain_corr_t *corr) {
     char **include_blocks, **include_blocks_val;
     uint32_t include_blocks_num;
     double capture_aperture;
@@ -117,9 +115,9 @@ int x3f_get_merrill_type_spatial_gain(x3f_t *x3f, int hp_flag,
 
     merrill_spatial_gain_t *gains = NULL, *g;
     merrill_spatial_gain_t *q_closest[4] = {NULL, NULL, NULL, NULL};
-    double q_closest_dx[4] = {INFINITY, -INFINITY, -INFINITY, INFINITY};
-    double q_closest_dy[4] = {INFINITY, INFINITY, -INFINITY, -INFINITY};
-    double q_closest_d2[4] = {INFINITY, INFINITY, INFINITY, INFINITY};
+    double q_closest_dx[4] = {INFINITY, -INFINITY, -INFINITY,  INFINITY};
+    double q_closest_dy[4] = {INFINITY,  INFINITY, -INFINITY, -INFINITY};
+    double q_closest_d2[4] = {INFINITY,  INFINITY,  INFINITY,  INFINITY};
     double q_weight_x[4], q_weight_y[4], q_weight[4];
     double x, y;
     int i;
@@ -274,12 +272,11 @@ int x3f_get_merrill_type_spatial_gain(x3f_t *x3f, int hp_flag,
         c->gain = NULL;        /* No interploated gains present */
         c->malloc = 0;
 
-        c->rows = c->cols = -1;
-        c->rowoff = c->coloff = 0;
-        c->rowpitch = c->colpitch = 1;
-        c->chan = i;
-        c->channels = 1;
-
+        c->rows      = c->cols = -1;
+        c->rowoff    = c->coloff = 0;
+        c->rowpitch  = c->colpitch = 1;
+        c->chan      = i;
+        c->channels  = 1;
         c->mgain_num = 0;
     }
 
@@ -308,7 +305,7 @@ int x3f_get_merrill_type_spatial_gain(x3f_t *x3f, int hp_flag,
     for (i = 0; i < 4; i++) {
         char *name;
         char *channels_normal[3] = {"R", "G", "B"};
-        char *channels_hp[6] = {"R", "G", "B0", "B1", "B2", "B3"};
+        char *channels_hp[6]     = {"R", "G", "B0", "B1", "B2", "B3"};
         char **channels = hp_flag ? channels_hp : channels_normal;
         int j;
 
@@ -326,15 +323,12 @@ int x3f_get_merrill_type_spatial_gain(x3f_t *x3f, int hp_flag,
                 return 0;
         }
     }
-
-    for (i = 0; i < corr_num; i++)
-        if (corr[i].mgain_num == 0) return 0;
+    for (i = 0; i < corr_num; i++) if (corr[i].mgain_num == 0) return 0;
 
     return corr_num;
 }
 
 int x3f_get_interp_merrill_type_spatial_gain(x3f_t *x3f, int hp_flag, x3f_spatial_gain_corr_t *corr) {
-
     int corr_num = x3f_get_merrill_type_spatial_gain(x3f, hp_flag, corr);
     int i;
 
@@ -342,7 +336,7 @@ int x3f_get_interp_merrill_type_spatial_gain(x3f_t *x3f, int hp_flag, x3f_spatia
         x3f_spatial_gain_corr_t *c = &corr[i];
         int j, num = c->rows * c->cols * c->channels;
 
-        c->gain = malloc(num * sizeof(double));
+        c->gain   = malloc(num * sizeof(double));
         c->malloc = 1;
 
         for (j = 0; j < num; j++) {
@@ -355,12 +349,10 @@ int x3f_get_interp_merrill_type_spatial_gain(x3f_t *x3f, int hp_flag, x3f_spatia
             }
         }
     }
-
     return corr_num;
 }
 
-int x3f_get_classic_spatial_gain(x3f_t *x3f, char *wb,
-                                 x3f_spatial_gain_corr_t *corr) {
+int x3f_get_classic_spatial_gain(x3f_t *x3f, char *wb, x3f_spatial_gain_corr_t *corr) {
     char *gain_name;
 
     if ((x3f_get_camf_property(x3f, "SpatialGainTables", wb, &gain_name) &&
@@ -375,29 +367,22 @@ int x3f_get_classic_spatial_gain(x3f_t *x3f, char *wb,
         corr->rowpitch = corr->colpitch = 1;
         corr->chan = 0;
         corr->mgain_num = 0;
-
         return 1;
     }
-
     return 0;
 }
 
 int x3f_get_spatial_gain(x3f_t *x3f, char *wb, x3f_spatial_gain_corr_t *corr) {
     int corr_num = 0;
-
     corr_num += x3f_get_interp_merrill_type_spatial_gain(x3f, 0, &corr[corr_num]);
-
     if (corr_num == 0)
         corr_num += x3f_get_classic_spatial_gain(x3f, wb, &corr[corr_num]);
-
     return corr_num;
 }
 
 void x3f_cleanup_spatial_gain(x3f_spatial_gain_corr_t *corr, int corr_num) {
     int i;
-
-    for (i = 0; i < corr_num; i++)
-        if (corr[i].malloc) free(corr[i].gain);
+    for (i = 0; i < corr_num; i++) if (corr[i].malloc) free(corr[i].gain);
 }
 
 double x3f_calc_spatial_gain(x3f_spatial_gain_corr_t *corr, int corr_num,
@@ -439,8 +424,8 @@ double x3f_calc_spatial_gain(x3f_spatial_gain_corr_t *corr, int corr_num,
             r2 = &c->gain[(ri + 1) * c->cols * c->channels];
         }
 
-        if (ci < 0)
-            co1 = co2 = channel;
+//        if (ci < 0) co1 = co2 = channel;
+
         if (ci >= c->cols - 1)
             co1 = co2 = (c->cols - 1) * c->channels + channel;
         else {
@@ -453,6 +438,5 @@ double x3f_calc_spatial_gain(x3f_spatial_gain_corr_t *corr, int corr_num,
 
         gain *= gr1 + rf * (gr2 - gr1);
     }
-
     return gain;
 }
