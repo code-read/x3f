@@ -16,23 +16,15 @@
 #include <tiffio.h>
 
 /* extern */
-x3f_return_t x3f_dump_raw_data_as_tiff(x3f_t *x3f,
-                                       char *outfilename,
-                                       x3f_color_encoding_t encoding,
-                                       int crop,
-                                       int denoise,
-                                       int apply_sgain,
-                                       char *wb,
-                                       int compress) {
+x3f_return_t x3f_dump_raw_data_as_tiff(x3f_t *x3f, char *outfilename, x3f_color_encoding_t encoding,
+                                       int crop, int denoise, int apply_sgain, char *wb, int compress) {
     x3f_area16_t image;
     TIFF *f_out = TIFFOpen(outfilename, "w");
     int row;
 
     if (f_out == NULL) return X3F_OUTFILE_ERROR;
 
-    if (!x3f_get_image(x3f, &image, NULL, encoding,
-                       crop, denoise, apply_sgain,
-                       wb)) {
+    if (!x3f_get_image(x3f, &image, NULL, encoding, crop, denoise, apply_sgain, wb)) {
         TIFFClose(f_out);
         return X3F_ARGUMENT_ERROR;
     }
