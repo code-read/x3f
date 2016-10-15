@@ -1,3 +1,10 @@
+0.55: Carson Wilson 2015-10-15
+  Added -sgaintiff option to save Merrill type spatial
+  ..gain tables as TIFF files.
+  todo: incorporate Roland's Git-based version code
+  todo: discover which spatial gain table(s) are used
+  ..to process which types of image.
+
 0.54: Erik and Roland Karlsson and Mark Roden 2015-08-14
   Fix incandenscent for Quattro
   Ignore incorrect DarkShieldBottom for DP2
