@@ -106,7 +106,7 @@ static void usage(char *progname) {
                     "   -wb <WB>        Select white balance preset\n"
                     "   -compress       Enable ZIP compression for DNG and TIFF output\n"
                     "   -ocl            Use OpenCL\n"
-                    "   -sgaintiff      Save spatial gain tables as TIFF files (implies -meta)\n"
+                    "   -sgaintiff      Save Merrill spatial gain tables as TIFF files (implies -meta)\n"
                     "\n"
                     "QUANTIFIERS\n"
                     "   -offset <OFF>   Offset for SD14 and older\n"
@@ -321,7 +321,7 @@ int main(int argc, char *argv[]) {
 
         char tmpfile[MAXTMPPATH + 1];
         char outfile[MAXOUTPATH + 1];
-        x3f_return_t ret_dump;
+        x3f_return_t dump_ret = X3F_UNDEFINED_ERROR;
         int sgain;
 
         files++;
@@ -377,8 +377,7 @@ int main(int argc, char *argv[]) {
         }
 
         if (make_paths(infile, outdir, extension[file_type], tmpfile, outfile)) {
-            x3f_printf(ERR, "Too large outfile path for infile %s and outdir %s\n",
-                       infile, outdir);
+            x3f_printf(ERR, "Too large outfile path for infile %s and outdir %s\n", infile, outdir);
             goto found_error;
         }
 
@@ -391,48 +390,40 @@ int main(int argc, char *argv[]) {
         switch (file_type) {
             case META:
                 x3f_printf(INFO, "Dump META DATA to %s\n", outfile);
-                ret_dump = x3f_dump_meta_data(x3f, tmpfile);
+                 dump_ret = x3f_dump_meta_data(x3f, tmpfile);
                 break;
             case JPEG:
                 x3f_printf(INFO, "Dump JPEG to %s\n", outfile);
-                ret_dump = x3f_dump_jpeg(x3f, tmpfile);
+                 dump_ret = x3f_dump_jpeg(x3f, tmpfile);
                 break;
             case RAW:
                 x3f_printf(INFO, "Dump RAW block to %s\n", outfile);
-                ret_dump = x3f_dump_raw_data(x3f, tmpfile);
+                 dump_ret = x3f_dump_raw_data(x3f, tmpfile);
                 break;
             case TIFF:
                 x3f_printf(INFO, "Dump RAW as TIFF to %s\n", outfile);
-                ret_dump = x3f_dump_raw_data_as_tiff(x3f, tmpfile,
-                                                     color_encoding,
-                                                     crop, denoise, sgain, wb,
-                                                     compress);
+                 dump_ret = x3f_dump_raw_data_as_tiff(x3f, tmpfile, color_encoding,
+                                                     crop, denoise, sgain, wb, compress);
                 break;
             case DNG:
                 x3f_printf(INFO, "Dump RAW as DNG to %s\n", outfile);
-                ret_dump = x3f_dump_raw_data_as_dng(x3f, tmpfile,
-                                                    denoise, sgain, wb,
-                                                    compress);
+                 dump_ret = x3f_dump_raw_data_as_dng(x3f, tmpfile, denoise, sgain, wb, compress);
                 break;
             case PPMP3:
             case PPMP6:
                 x3f_printf(INFO, "Dump RAW as PPM to %s\n", outfile);
-                ret_dump = x3f_dump_raw_data_as_ppm(x3f, tmpfile,
-                                                    color_encoding,
-                                                    crop, denoise, sgain, wb,
-                                                    file_type == PPMP6);
+                 dump_ret = x3f_dump_raw_data_as_ppm(x3f, tmpfile, color_encoding,
+                                                    crop, denoise, sgain, wb, file_type == PPMP6);
                 break;
             case HISTOGRAM:
                 x3f_printf(INFO, "Dump RAW as CSV histogram to %s\n", outfile);
-                ret_dump = x3f_dump_raw_data_as_histogram(x3f, tmpfile,
-                                                          color_encoding,
-                                                          crop, denoise, sgain, wb,
-                                                          log_hist);
+                 dump_ret = x3f_dump_raw_data_as_histogram(x3f, tmpfile, color_encoding,
+                                                          crop, denoise, sgain, wb, log_hist);
                 break;
         }
 
-        if (X3F_OK != ret_dump) {
-            x3f_printf(ERR, "Could not dump to %s: %s\n", tmpfile, x3f_err(ret_dump));
+        if (X3F_OK !=  dump_ret) {
+            x3f_printf(ERR, "Could not dump to %s: %s\n", tmpfile, x3f_err( dump_ret));
             errors++;
         } else {
             if (rename(tmpfile, outfile) != 0) {
@@ -444,7 +435,6 @@ int main(int argc, char *argv[]) {
         goto clean_up;
 
         found_error:
-
         errors++;
 
         clean_up:
