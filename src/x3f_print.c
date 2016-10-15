@@ -238,7 +238,7 @@ static void print_camf_meta_data2(FILE *f_out, x3f_camf_t *CAMF) {
                            entry[i].matrix_decoded_type,
                            entry[i].matrix_dim);
 */
-
+                // Note: AFAIK, these labels are found only in Merrill-type X3F files:
                 if (sgain_tiff) {
                     if (!strncmp(entry[i].name_address, "SpatialGainR_", 13) ||
                         !strncmp(entry[i].name_address, "SpatialGainG_", 13) ||

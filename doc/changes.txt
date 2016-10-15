@@ -6,7 +6,7 @@
   ..to process which types of image.
 
 0.54: Erik and Roland Karlsson and Mark Roden 2015-08-14
-  Fix incandenscent for Quattro
+  Fix incandescent for Quattro
   Ignore incorrect DarkShieldBottom for DP2
   Denoising on by default
   TIFF default sRGB

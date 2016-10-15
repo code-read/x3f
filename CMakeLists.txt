@@ -4,6 +4,7 @@ project(x3f)
 set(CMAKE_VERBOSE_MAKEFILE TRUE)  # Verbose output from 'make' during the build
 
 #  Global x3f project version number.
+# todo: tie this to `git describe --always --dirty --tags` as Roland (now) has in makefile:
 set (x3f_extract_VERSION_MAJOR  0)
 set (x3f_extract_VERSION_MINOR  56)
 
@@ -62,6 +63,8 @@ set(SOURCE_FILES
     src/x3f_process.h
     src/x3f_spatial_gain.c
     src/x3f_spatial_gain.h)
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
 
 add_executable(x3f_extract ${SOURCE_FILES})
 

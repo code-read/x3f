@@ -1934,6 +1934,7 @@ static void x3f_load_camf(x3f_info_t *I, x3f_directory_entry_t *DE) {
             return "outfile error";
         case X3F_INTERNAL_ERROR:
             return "internal error";
+        case X3F_UNDEFINED_ERROR:
         default:
             return "undefined error";
     }
