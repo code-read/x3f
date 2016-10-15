@@ -436,7 +436,8 @@ typedef enum x3f_return_e {
     X3F_ARGUMENT_ERROR = 1,
     X3F_INFILE_ERROR = 2,
     X3F_OUTFILE_ERROR = 3,
-    X3F_INTERNAL_ERROR = 4
+    X3F_INTERNAL_ERROR = 4,
+    X3F_UNDEFINED_ERROR = 5
 } x3f_return_t;
 
 extern int legacy_offset;
